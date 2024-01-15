@@ -10,10 +10,10 @@ pub fn generate_key(key: &str, c1: f64, c2: f64, y1: f64, y2: f64) -> Result<(),
     println!("All key: {:?}, C1: {}, C2: {}", key, c1, c2);
     let mut new_c1: f64 = 0 as f64;
     let mut new_c2: f64 = 0 as f64;
-    let mut y: f64 = 0 as f64;
-    // let mut yi: f64 = 0 as f64;
+    let mut y: f64;
     let mut y1_: f64 = y1;
     let mut y2_: f64 = y2;
+
     for (i, c) in key.char_indices() {
         // println!("{}: {}", i, c);
         y = y_function(c, c1*y1_, c2*y2_);
