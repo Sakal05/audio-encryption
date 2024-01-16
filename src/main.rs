@@ -13,7 +13,7 @@ fn main() {
     // reader.read_to_end(&mut buffer).unwrap();
 
     // println!("Raw audio file: {:?}", buffer);
-    let keys = "testing123xya1sd";
+    let keys = "testing123xza1sd";
 
     let _test_key = key_generator::generate_key(keys, 0.23453412312, -0.6712345331, 0.341564532, -0.123453123).unwrap();
 

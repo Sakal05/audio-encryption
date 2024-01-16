@@ -10,20 +10,20 @@ pub fn generate_key(key: &str, c1: f64, c2: f64, y1: f64, y2: f64) -> Result<(),
     println!("All key: {:?}, C1: {}, C2: {}", key, c1, c2);
     let mut new_c1: f64 = 0 as f64;
     let mut new_c2: f64 = 0 as f64;
-    let mut y: f64;
     let mut y1_: f64 = y1;
     let mut y2_: f64 = y2;
 
-    for (i, c) in key.char_indices() {
+    for c in key.chars() {
         // println!("{}: {}", i, c);
-        y = y_function(c, c1*y1_, c2*y2_);
+        let mut y = y_function(c, c1*y1_, c2*y2_);
         y = prevent_overflow(y);
         y2_ = y1_;
+        // must be shifted three value first
         y1_ = y;
 
         new_c1 = y2_;
         new_c2 = y1_;
-        println!("C{i}: ({c}) \ny: {y1_}\ny': {y2_}\n===============");
+        println!("y: {y1_}\ny': {y2_}\n===============");
     }
     println!("C1: {new_c1}, C2: {new_c2}");
 
