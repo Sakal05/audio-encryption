@@ -36,3 +36,20 @@ pub fn prevent_overflow(y: f64) -> f64 {
     let of = (y % (2 as f64)) - (1 as f64);
     of
 }
+
+use std::fs::File;
+use std::io::{Read, Write, BufReader, BufWriter};
+
+pub fn read_file(file_path: &str) -> Vec<u8> {
+    let file = File::open(file_path).unwrap();
+    let mut buffer = Vec::new();
+    let mut reader = BufReader::new(file);
+    reader.read_to_end(&mut buffer).unwrap();
+
+    buffer
+}
+
+pub fn write_file(file_path: &str, bytes: Vec<u8>){
+    let mut file =  BufWriter::new(File::create(file_path).unwrap());
+    file.write_all(&bytes).unwrap();
+}
