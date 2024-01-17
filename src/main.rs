@@ -1,31 +1,42 @@
 use std::fs::File;
 use std::io::{Read, Write, BufReader, BufWriter};
 mod key_generator;
+mod encryption;
+mod decryption;
+use crate::encryption::encrypt;
+use crate::decryption::decrypt;
+pub mod utils;
 fn main() {
-    // Open the input file for reading
-    // let file = File::open("typing.mp3").unwrap();
-    // let metadata = file.metadata().unwrap();
-    // // println!("Raw data: {:#?}", metadata);
-
-    // // Read the audio data into a buffer
-    // let mut buffer = Vec::new();
-    // let mut reader = BufReader::new(file);
-    // reader.read_to_end(&mut buffer).unwrap();
-
-    // println!("Raw audio file: {:?}", buffer);
     let keys = "testing123xza1sd";
 
     let _test_key = key_generator::generate_key(keys, 0.23453412312, -0.6712345331, 0.341564532, -0.123453123).unwrap();
-
-    // // Encrypt the audio data (simple XOR encryption for demonstration purposes)
-    // let key: u8 = 0xAA; // Replace this with a more secure key in a real-world scenario
-    // for byte in &mut buffer {
-    //     *byte ^= key;
-    // }
+    // let metadata = file.metadata().unwrap();
+ 
+    let file_data = read_file("typing.mp3");
+    let _test_encrypt = encrypt(file_data, _test_key.0, _test_key.1, 0.341522532, -0.12345883);
 
     // // Open the output file for writing the encrypted data
-    // let mut encrypted_file = BufWriter::new(File::create("encrypted_typing.mp3").unwrap());
+    write_file("test_encrypted_typing.mp3", _test_encrypt);    
+    
+    let en_file_data = read_file("test_encrypted_typing.mp3");
 
-    // // Write the encrypted data to the output file
-    // encrypted_file.write_all(&buffer).unwrap();
+    // println!("De buffer: {:?}", de_buffer);
+    let _test_decrypt = decrypt(en_file_data, _test_key.0, _test_key.1, 0.341522532, -0.12345883);
+    // // Write the decrypted data to the output file
+    write_file("test_decrypted_typing.mp3", _test_decrypt);    
+
+}
+
+fn read_file(file_path: &str) -> Vec<u8> {
+    let file = File::open(file_path).unwrap();
+    let mut buffer = Vec::new();
+    let mut reader = BufReader::new(file);
+    reader.read_to_end(&mut buffer).unwrap();
+
+    buffer
+}
+
+fn write_file(file_path: &str, bytes: Vec<u8>){
+    let mut file =  BufWriter::new(File::create(file_path).unwrap());
+    file.write_all(&bytes).unwrap();
 }
