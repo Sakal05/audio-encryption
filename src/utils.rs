@@ -1,40 +1,42 @@
 pub trait Function<T> {
-    fn y_function(&self) -> f32;
-    fn reverse_y_function(&self) -> f32;
+    fn y_function(&self) -> f64;
+    fn reverse_y_function(&self) -> f64;
 }
 
+#[derive(Debug)]
 pub struct KeyParameter<T> {
     pub x: T,
-    pub p: f32,
-    pub q: f32
+    pub p: f64,
+    pub q: f64
 }
 
 
 impl<T> Function<T> for KeyParameter<T> where
-T: Into<f32> + Copy,
+T: Into<f64> + Copy,
 {
-    fn y_function(&self) -> f32 {
-        let x_as_f32: f32 = self.x.into(); // Convert character to a numeric type first
+    fn y_function(&self) -> f64 {
+        let x_as_f64: f64 = self.x.into(); // Convert character to a numeric type first
         // print all value
-        // println!("x: {}, p: {}, q: {}", x_as_f32, self.p, self.q);
-        let result = x_as_f32 + self.p + self.q; // Perform the arithmetic and implicitly return the result
+        // println!("x: {}, p: {}, q: {}", x_as_f64, self.p, self.q);
+        let result = x_as_f64 + self.p + self.q; // Perform the arithmetic and implicitly return the result
         // println!("F Function result: {}", result);
         result
     }
 
-    fn reverse_y_function(&self) -> f32 {
-        let x_as_f32: f32 = self.x.into(); // Convert character to a numeric type first
+    fn reverse_y_function(&self) -> f64 {
+        let x_as_f64: f64 = self.x.into(); // Convert character to a numeric type first
         // print all value
-        // println!("x: {}, p: {}, q: {}", x_as_f32, self.p, self.q);
-        let result = x_as_f32 - self.p - self.q; // Perform the arithmetic and implicitly return the result
+        // println!("x: {}, p: {}, q: {}", x_as_f64, self.p, self.q);
+        let result = x_as_f64 - self.p - self.q; // Perform the arithmetic and implicitly return the result
         // println!("F Function result: {}", result);
         result
     }
 }
 
-pub fn prevent_overflow(y: f32) -> f32 {
-    let of = (y % (2 as f32)) - (1 as f32);
-    of
+pub fn prevent_overflow(y: &mut f64) {
+    *y = (*y % 2 as f64) - 1 as f64;
+    // let of = (y % (2 as f64)) - (1 as f64);
+    // let of = (y + 1 as f64) % 2 as f64;
 }
 
 use std::fs::File;
@@ -52,4 +54,9 @@ pub fn read_file(file_path: &str) -> Vec<u8> {
 pub fn write_file(file_path: &str, bytes: Vec<u8>){
     let mut file =  BufWriter::new(File::create(file_path).unwrap());
     file.write_all(&bytes).unwrap();
+}
+
+pub fn limit_decimal_places(value: f64, decimal_places: usize) -> f64 {
+    let multiplier = 10u64.pow(decimal_places as u32) as f64;
+    (value * multiplier).round() / multiplier
 }
