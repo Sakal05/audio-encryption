@@ -11,6 +11,10 @@ panic = 'abort'     # Abort on panic
 strip = true        # Strip symbols from binary*
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "audioencrypt"
+crate-type=["cdylib", "rlib"]
+
 [dependencies]
 anyhow = "1.0.79"
 rodio = "0.17.3"

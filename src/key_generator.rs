@@ -3,8 +3,7 @@ use anyhow::Error;
 use crate::utils::{Function, KeyParameter, prevent_overflow};
 
 // c1, c2, y1, x1, must be in the domain of [-1, 1]
-
-pub fn generate_key(key: &str, c1: f64, c2: f64, y1: f64, y2: f64) -> Result<(f64, f64), Error> {
+pub extern fn generate_key(key: &str, c1: f64, c2: f64, y1: f64, y2: f64) -> Result<(f64, f64), Error> {
     if key.len() != 16 {
         return Err(Error::msg("Invalid key length"));
     }

@@ -1,6 +1,6 @@
 use crate::utils::{limit_decimal_places, prevent_overflow, Function, KeyParameter};
 
-pub fn encrypt(raw: Vec<u8>, c1: f64, c2: f64, y1: f64, y2: f64) -> Vec<u64>
+pub extern fn encrypt(raw: Vec<u8>, c1: f64, c2: f64, y1: f64, y2: f64) -> Vec<u64>
 {
     // println!("Raw data: {:?}", raw.first());
     let mut encrypted_data: Vec<u64> = Vec::new();

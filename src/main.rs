@@ -1,11 +1,18 @@
 
-mod key_generator;
-mod encryption;
-mod decryption;
-use crate::encryption::encrypt;
-use crate::decryption::decrypt;
-pub mod utils;
-use crate::utils::{read_file, write_file};
+// mod key_generator;
+// mod encryption;
+// mod decryption;
+// use crate::encryption::encrypt;
+// use crate::decryption::decrypt;
+// pub mod utils;
+
+
+use audioencrypt::{
+    utils::{read_file, write_file},
+    key_generator,
+    encryption::encrypt,
+    decryption::decrypt,
+};
 
 fn main() {
     let keys = "testing123xza1sd";
