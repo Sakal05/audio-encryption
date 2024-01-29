@@ -33,12 +33,9 @@ pub extern fn encrypt(raw: Vec<u8>, c1: f64, c2: f64, y1: f64, y2: f64) -> Vec<u
         } else {
             // Handle the case where y is infinite
             println!("Y value is infinite! Skipping this byte.");
-            // You might want to decide how to handle this scenario, e.g., skip the byte or use a default value.
         }
         // encrypted_data.push(y.round() as u64);
     }
-
-
     encrypted_data
 }
 

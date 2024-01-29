@@ -1,6 +1,6 @@
 use crate::utils::{limit_decimal_places, Function, KeyParameter};
 
-pub extern fn decrypt(raw: Vec<u64>, c1: f64, c2: f64, y1: f64, y2: f64) -> Vec<u8>
+pub fn decrypt(raw: Vec<u64>, c1: f64, c2: f64, y1: f64, y2: f64) -> Vec<u8>
 {
     let mut decrypted_data: Vec<u8> = Vec::new();
     let mut y1_: f64 = y1;
