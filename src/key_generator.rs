@@ -2,7 +2,7 @@
 use anyhow::Error;
 use crate::utils::{Function, KeyParameter, prevent_overflow};
 
-pub extern fn generate_key(key: &str, c1: f64, c2: f64, y1: f64, y2: f64) -> Result<(f64, f64), Error> {
+pub fn generate_key(key: &str, c1: f64, c2: f64, y1: f64, y2: f64) -> Result<(f64, f64), Error> {
     if key.len() != 16 {
         return Err(Error::msg("Invalid key length"));
     }
@@ -21,10 +21,10 @@ pub extern fn generate_key(key: &str, c1: f64, c2: f64, y1: f64, y2: f64) -> Res
                 p: c1 * y1_,
                 q: c2 * y2_,
             };
-            let y = key_parameter.y_function();
+            let mut y = key_parameter.y_function();
             // println!("Before overlfow: {:?}", key_parameter);
-            // prevent_overflow(&mut y);
-            
+            prevent_overflow(&mut y);
+
             // println!("After overlfow: {:?}", y);
             y2_ = y1_;
             y1_ = y;

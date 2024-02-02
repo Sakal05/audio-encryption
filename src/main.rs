@@ -26,8 +26,8 @@ fn main() {
 
     Example run:
     Key Generation Example: cargo run -- operation=generate_key value=testing123xza1sd c1=0.345567 c2=0.134134 y1=-0.34553456 y2=0.378675
-    Encryption: Example: cargo run -- operation=encrypt value=typing.mp3 c1=106.18962573250775 c2=101.62012179383042 y1=-0.34553456 y2=0.378675
-    Decryption: Example: cargo run -- operation=decrypt value=encrypted_typing.mp3 c1=106.18962573250775 c2=101.62012179383042 y1=-0.34553456 y2=0.378675
+    Encryption: Example: cargo run -- operation=encrypt value=typing.mp3 c1=-0.6812081080792964 c2=0.8923235548247561 y1=-0.34553456 y2=0.378675
+    Decryption: Example: cargo run -- operation=decrypt value=encrypted_typing.mp3 c1=-0.6812081080792964 c2=0.8923235548247561 y1=-0.34553456 y2=0.378675
     */
     enum Operation {
         KeyGeneration,
@@ -112,6 +112,7 @@ fn main() {
             let file_data = read_file(&op_value);
             println!("last byte of raw data: {:?}", file_data.first());
             let encrypted_data = encrypt(file_data, c1, c2, y1, y2);
+            println!("Last byte of encrypted data: {:?}", encrypted_data.last());
             write_file(
                 &format!("encrypted_{}", &op_value),
                 encrypted_data
@@ -124,14 +125,15 @@ fn main() {
             let _: () = con.set(key, serde_json::to_string(&encrypted_data).unwrap()).expect("Failed setting key value");
         }
         Operation::Decryption => {
-            let file_data = read_file(&op_value);
-            println!("last byte of encrypted data: {:?}", file_data.first());
+            // let file_data = read_file(&op_value);
+            // println!("last byte of encrypted data: {:?}", file_data.first());
 
             // get encrypted data from redis
             let encrypted_data: String = con.get(format!("{}_{}",c1, c2)).expect("Key value not found");
             let encrypted_to_vec: Vec<u64> = serde_json::from_str(&encrypted_data).expect("Failed to parse encrypted data");
-            println!("encrypted data: {:?}", encrypted_to_vec.last());
+            println!("last encrypted data: {:?}", encrypted_to_vec.last());
             let decrypted_data = decrypt(encrypted_to_vec, c1, c2, y1, y2);
+            println!("last decrypted data: {:?}", decrypted_data.last());
             write_file(&format!("decrypted_{}", &op_value), decrypted_data);
         }
     }

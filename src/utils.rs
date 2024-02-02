@@ -34,9 +34,19 @@ T: Into<f64> + Copy,
 }
 
 pub fn prevent_overflow(y: &mut f64) {
-    *y = (*y % 2 as f64) - 1 as f64;
+    *y = (*y + (1 as f64) % 2 as f64) - 1 as f64;
     // let of = (y % (2 as f64)) - (1 as f64);
     // let of = (y + 1 as f64) % 2 as f64;
+}
+
+pub fn normalize(n:f64) -> f64{
+    let n = (n - 127.5) / 127.5;
+    n
+}
+
+pub fn denormalize(n: f64) -> f64 {
+    let n = (n * 127.5) + 127.5;
+    n
 }
 
 use std::fs::File;
