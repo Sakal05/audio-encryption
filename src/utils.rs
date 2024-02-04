@@ -34,8 +34,8 @@ T: Into<f64> + Copy,
 }
 
 pub fn prevent_overflow(y: &mut f64) {
-    // *y = (*y + (1 as f64) % 2 as f64) - 1 as f64;
-    *y = y.clamp(0.0, 1.0);
+    *y = (*y + 1.00 % 2.00) - 1.00;
+    // *y = y.clamp(0.0, 1.0);
 
 }
 
@@ -44,14 +44,14 @@ const MIN_ORIGINAL: u8 = u8::MIN;
 
 pub fn normalize(n:f64) -> f64 {
     // (n - MIN_ORIGINAL as f64) / (MAX_ORIGINAL as f64 - MIN_ORIGINAL as f64)
-    ((n + 1.0) * 127.5).round()
+    (n - 127.5) / 127.5
     // (n / 127.5) - 1.0
     // let n = (n - 128.0) / 128.0;
     // n
 }
 
 pub fn denormalize(n: f64) -> f64 {
-    (n / 127.5) - 1.0
+    (n * 127.5) + 127.5
     // n * (MAX_ORIGINAL as f64 - MIN_ORIGINAL as f64) + MIN_ORIGINAL as f64
     // (n + 1.0) * 127.5
     // let n = (n * 128.0) + 128.0;

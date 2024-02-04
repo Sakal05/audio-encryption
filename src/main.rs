@@ -110,7 +110,7 @@ fn main() {
         }
         Operation::Encryption => {
             let file_data = read_file(&op_value);
-            println!("last byte of raw data: {:?}", file_data.first());
+            println!("last byte of raw data: {:?}", file_data[1]);
             let encrypted_data: Vec<u8> = encrypt(file_data, c1, c2, y1, y2);
             println!("Last byte of encrypted data: {:?}", encrypted_data.first());
             write_file(&format!("encrypted_{}", &op_value), encrypted_data);
@@ -119,7 +119,7 @@ fn main() {
             let file_data = read_file(&op_value);
             // println!("last byte of encrypted data: {:?}", file_data.first());
             let decrypted_data = decrypt(file_data, c1, c2, y1, y2);
-            println!("last decrypted data: {:?}", decrypted_data.last());
+            println!("last decrypted data: {:?}", decrypted_data.first());
             write_file(&format!("decrypted_{}", &op_value), decrypted_data);
         }
     }
