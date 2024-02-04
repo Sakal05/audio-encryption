@@ -47,7 +47,7 @@ fn main() {
 
     if &args.len() < &6 {
         println!("Arguments must be exactly 6 arguments!\n Current Arg: {}", &args.len());
-        return
+        return  
     }
 
     for arg in args.iter().skip(1) {
@@ -111,28 +111,14 @@ fn main() {
         Operation::Encryption => {
             let file_data = read_file(&op_value);
             println!("last byte of raw data: {:?}", file_data.first());
-            let encrypted_data = encrypt(file_data, c1, c2, y1, y2);
-            println!("Last byte of encrypted data: {:?}", encrypted_data.last());
-            write_file(
-                &format!("encrypted_{}", &op_value),
-                encrypted_data
-                    .clone()
-                    .into_iter()
-                    .map(|f| { f as u8 })
-                    .collect()
-            );
-            let key = format!("{}_{}",c1, c2);
-            let _: () = con.set(key, serde_json::to_string(&encrypted_data).unwrap()).expect("Failed setting key value");
+            let encrypted_data: Vec<u8> = encrypt(file_data, c1, c2, y1, y2);
+            println!("Last byte of encrypted data: {:?}", encrypted_data.first());
+            write_file(&format!("encrypted_{}", &op_value), encrypted_data);
         }
         Operation::Decryption => {
-            // let file_data = read_file(&op_value);
+            let file_data = read_file(&op_value);
             // println!("last byte of encrypted data: {:?}", file_data.first());
-
-            // get encrypted data from redis
-            let encrypted_data: String = con.get(format!("{}_{}",c1, c2)).expect("Key value not found");
-            let encrypted_to_vec: Vec<u64> = serde_json::from_str(&encrypted_data).expect("Failed to parse encrypted data");
-            println!("last encrypted data: {:?}", encrypted_to_vec.last());
-            let decrypted_data = decrypt(encrypted_to_vec, c1, c2, y1, y2);
+            let decrypted_data = decrypt(file_data, c1, c2, y1, y2);
             println!("last decrypted data: {:?}", decrypted_data.last());
             write_file(&format!("decrypted_{}", &op_value), decrypted_data);
         }
@@ -142,41 +128,4 @@ fn main() {
         println!("Key Generation result: {} {}", result.0, result.1);
     }
 
-    // println!("All arg: {:?}", &args);
-
-    // let keys = "testing123xza1sd";
-    // let k_y1: f64 = 0.345567;
-    // let k_y2: f64 = 0.1545678;
-    // let c1: f64 = -0.34553456;
-    // let c2: f64 = 0.378675;
-
-    // let _test_key = key_generator::generate_key(keys, c1, c2, k_y1, k_y2).unwrap();
-    // println!("Key generator: {} {}", _test_key.0, _test_key.1);
-    // // let metadata = file.metadata().unwrap();
-    // let y1_prime = 0.38586416;
-    // let y2_prime = 0.1958887;
-
-    // let file_data = read_file("typing.mp3");
-    // println!("last byte of raw data: {:?}", file_data.first());
-    // let encrypted_data = encrypt(file_data, _test_key.0, _test_key.1, y1_prime, y2_prime);
-
-    // // // Open the output file for writing the encrypted data
-    // write_file(
-    //     "test_encrypted_typing.mp3",
-    //     encrypted_data
-    //         .clone()
-    //         .into_iter()
-    //         .map(|f| { f as u8 })
-    //         .collect()
-    // );
-
-    // let en_file_data = read_file("test_encrypted_typing.mp3");
-    // println!("last byte of encrypted data: {:?}", encrypted_data.last());
-    // // print!("Raw en: {:?}", encrypted_data);
-    // // println!("De buffer: {:?}", de_buffer);
-    // //encrypted_data.into_iter().map(|f| {f as u64}).collect()
-    // let decrypted_data = decrypt(encrypted_data, _test_key.0, _test_key.1, y1_prime, y2_prime);
-    // println!("last byte of decrypted data: {:?}", decrypted_data.first());
-    // // // // Write the decrypted data to the output file
-    // write_file("test_decrypted_typing.mp3", decrypted_data);
 }

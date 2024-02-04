@@ -1,6 +1,6 @@
 use crate::utils::{ denormalize, limit_decimal_places, normalize, prevent_overflow, Function, KeyParameter };
 
-pub fn decrypt(raw: Vec<u64>, c1: f64, c2: f64, y1: f64, y2: f64) -> Vec<u8> {
+pub fn decrypt(raw: Vec<u8>, c1: f64, c2: f64, y1: f64, y2: f64) -> Vec<u8> {
     let mut decrypted_data: Vec<u8> = Vec::new();
     let mut y1_: f64 = y1;
     let mut y2_: f64 = y2;
@@ -11,12 +11,14 @@ pub fn decrypt(raw: Vec<u64>, c1: f64, c2: f64, y1: f64, y2: f64) -> Vec<u8> {
     for byte in raw {
         let key_parameter = KeyParameter {
             x: normalize(byte as f64),
+            // x: byte as f64,
             p: rounded_c1_y1,
             q: rounded_c2_y2,
         };
         let mut y = key_parameter.reverse_y_function();
-        prevent_overflow(&mut y);
+        // prevent_overflow(&mut y);
         y = denormalize(y);
+
         if y.is_finite() {
             y2_ = y1_;
             y1_ = y;

@@ -1,17 +1,12 @@
 use crate::utils::{
-    denormalize,
-    limit_decimal_places,
-    normalize,
-    prevent_overflow,
-    Function,
-    KeyParameter,
+    denormalize, limit_decimal_places, normalize, prevent_overflow, write_file, Function, KeyParameter
 };
 
 use crate::decryption::decrypt;
 
-pub fn encrypt(raw: Vec<u8>, c1: f64, c2: f64, y1: f64, y2: f64) -> Vec<u64> {
+pub fn encrypt(raw: Vec<u8>, c1: f64, c2: f64, y1: f64, y2: f64) -> Vec<u8> {
     // println!("Raw data: {:?}", raw.first());
-    let mut encrypted_data: Vec<u64> = Vec::new();
+    let mut encrypted_data: Vec<u8> = Vec::new();
     let mut raw_en: Vec<f64> = Vec::new();
     // println!("Y1: {y1} and Y2: {y2}");
     let mut y1_: f64 = y1;
@@ -22,36 +17,62 @@ pub fn encrypt(raw: Vec<u8>, c1: f64, c2: f64, y1: f64, y2: f64) -> Vec<u64> {
     let rounded_c2_y2 = limit_decimal_places(c2 * y2_, 5);
 
     for byte in raw {
-        let key_parameter = KeyParameter {
+        // println!("Normalize: {:?}", normalize(byte as f64));
+        let key_parameter: KeyParameter<f64> = KeyParameter {
             x: normalize(byte as f64),
+            // x: byte as f64,
             p: rounded_c1_y1,
             q: rounded_c2_y2,
         };
         // println!("Before y function: {:?}", y);
         let mut y = key_parameter.y_function();
-        prevent_overflow(&mut y);
+        // prevent_overflow(&mut y);
         y = denormalize(y);
-        // // let origin = y;
-        raw_en.push(y);
 
         if y.is_finite() {
             y2_ = y1_;
             y1_ = y;
+            // raw_en.push(y);
             // prevent_overflow(&mut y);
-            encrypted_data.push(y.round() as u64);
+            // println!("Before rounding and conversion: {}", y);
+            let encrypted_byte = y.round() as u8;
+            // println!("Rounded: {}", y.round() as u8);
+            // if (encrypted_byte > 255) {
+            //     println!("U8 max: {}", u8::MAX);
+            //     println!("Too large");
+            //     break;
+            // }
+            encrypted_data.push(encrypted_byte);
         } else {
             // Handle the case where y is infinite
             println!("Y value is infinite! Skipping this byte.");
         }
         // encrypted_data.push(y.round() as u64);
     }
+    
+    // let decrypted_data: Vec<u8> = decrypt(encrypted_data.clone(), c1, c2, y1, y2);
+    // println!("Dec last bytes: {:?}", decrypted_data.first());
+    // write_file(&format!("decryptedfds_hhhfk.mp3"), decrypted_data);
+    // println!("adjusted decrypted data: {:?}", byte.wrapping_sub(decrypted_byte as u64) as i64);
+    // let mut finalized_encrypted_data: Vec<u8> = Vec::new();
 
-    let decrypted_data = decrypt(encrypted_data.clone(), c1, c2, y1, y2);
+    // for (p, byte) in encrypted_data.into_iter().enumerate() {
+    //     let decrypted_byte = decrypted_data.get(p).map_or(0u8, |&b| b);
+    //     if decrypted_byte != byte {
+    //         let adjusted_byte = byte.wrapping_sub(decrypted_byte);
+    //         // println!("Adjusted byte: {:?}", adjusted_byte);
+    //         if adjusted_byte < 0 {
+    //             finalized_encrypted_data.push(byte - adjusted_byte);
+    //         } else {
+    //             finalized_encrypted_data.push(byte.wrapping_add(adjusted_byte));
 
-    for (p, mut byte) in encrypted_data.clone().into_iter().map(|f| {f as u8}).enumerate()  {
-        if byte != decrypted_data[p] {
-            byte += byte - decrypted_data[p];
-        }
-    }
+    //         }
+    //     } else {
+    //         println!("Exact correct: {}", decrypted_byte);
+    //         finalized_encrypted_data.push(byte);
+    //     }
+    // }
+
+    // finalized_encrypted_data
     encrypted_data
 }
