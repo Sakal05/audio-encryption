@@ -1,10 +1,6 @@
 use audioencrypt::{
-    utils::{ read_file, write_file },
-    key_generator,
-    encryption::encrypt,
-    decryption::decrypt,
+    decryption::decrypt, encryption::encrypt, key_generator, utils::{ read_file, read_mp3, write_file }
 };
-use redis::Commands;
 use std::env;
 
 
@@ -26,7 +22,7 @@ fn main() {
 
     Example run:
     Key Generation Example: cargo run -- operation=generate_key value=testing123xza1sd c1=0.345567 c2=0.134134 y1=-0.34553456 y2=0.378675
-    Encryption: Example: cargo run -- operation=encrypt value=typing.mp3 c1=-0.6812081080792964 c2=0.8923235548247561 y1=-0.34553456 y2=0.378675
+    Encryption: Example: cargo run -- operation=encrypt value=KWAN_Confuse.mp3 c1=-0.6812081080792964 c2=0.8923235548247561 y1=-0.34553456 y2=0.378675
     Decryption: Example: cargo run -- operation=decrypt value=encrypted_typing.mp3 c1=-0.6812081080792964 c2=0.8923235548247561 y1=-0.34553456 y2=0.378675
     */
     enum Operation {
@@ -41,9 +37,9 @@ fn main() {
     let mut y1: f64 = 0.654;
     let mut y2: f64 = 0.456;
 
-    let client = redis::Client::open("redis://127.0.0.1:6379").expect("Open Connection failed");
-    println!("Client: {:?}", client);
-    let mut con = client.get_connection().expect("Connection failed");
+    // let client = redis::Client::open("redis://127.0.0.1:6379").expect("Open Connection failed");
+    // println!("Client: {:?}", client);
+    // let mut con = client.get_connection().expect("Connection failed");
 
     if &args.len() < &6 {
         println!("Arguments must be exactly 6 arguments!\n Current Arg: {}", &args.len());
@@ -110,17 +106,27 @@ fn main() {
         }
         Operation::Encryption => {
             let file_data = read_file(&op_value);
-            println!("last byte of raw data: {:?}", file_data[1]);
-            let encrypted_data: Vec<u8> = encrypt(file_data, c1, c2, y1, y2);
-            println!("Last byte of encrypted data: {:?}", encrypted_data.first());
-            write_file(&format!("encrypted_{}", &op_value), encrypted_data);
+            // let _file_data2 = read_mp3(&op_value);
+            // match _file_data2 {
+            //     Some(data) => {
+            //         println!("Data: {:?}", data);
+            //         let _encrypted_data: Vec<f32> = encrypt(data, c1, c2, y1, y2);
+            //     }
+            //     None => println!("no data available")
+            // }
+            let _encrypted_data = encrypt(file_data, c1, c2, y1, y2);
+            // write_mp3();
+            // println!("File data2: {:?}", _file_data2);
+            println!("last byte of raw data: {:?}", &_encrypted_data[1]);
+            // println!("Last byte of encrypted data: {:?}", encrypted_data.first());
+            // write_file(&format!("encrypted_{}", &op_value), encrypted_data);
         }
         Operation::Decryption => {
-            let file_data = read_file(&op_value);
-            // println!("last byte of encrypted data: {:?}", file_data.first());
-            let decrypted_data = decrypt(file_data, c1, c2, y1, y2);
-            println!("last decrypted data: {:?}", decrypted_data.first());
-            write_file(&format!("decrypted_{}", &op_value), decrypted_data);
+            // let file_data = read_file(&op_value);
+            // // println!("last byte of encrypted data: {:?}", file_data.first());
+            // let decrypted_data = decrypt(file_data, c1, c2, y1, y2);
+            // println!("last decrypted data: {:?}", decrypted_data.first());
+            // write_file(&format!("decrypted_{}", &op_value), decrypted_data);
         }
     }
 
