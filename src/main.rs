@@ -1,5 +1,5 @@
 use audioencrypt::{
-    decryption::decrypt, encryption::encrypt, key_generator, utils::{ read_file, read_mp3, write_file }
+    decryption::decrypt, encryption::encrypt, key_generator, utils::{ read_file, read_waver, write_file }
 };
 use std::env;
 
@@ -32,10 +32,10 @@ fn main() {
     }
     let mut operation: Operation = Operation::KeyGeneration;
     let mut op_value: String = String::from("Password16chars");
-    let mut c1: f64 = 0.123;
-    let mut c2: f64 = 0.321;
-    let mut y1: f64 = 0.654;
-    let mut y2: f64 = 0.456;
+    let mut c1: f32 = 0.123;
+    let mut c2: f32 = 0.321;
+    let mut y1: f32 = 0.654;
+    let mut y2: f32 = 0.456;
 
     // let client = redis::Client::open("redis://127.0.0.1:6379").expect("Open Connection failed");
     // println!("Client: {:?}", client);
@@ -78,16 +78,16 @@ fn main() {
                     op_value = value.parse::<String>().expect("Invalid Value Parse");
                 }
                 "c1" => {
-                    c1 = value.parse::<f64>().expect("Invalid C1 Parse");
+                    c1 = value.parse::<f32>().expect("Invalid C1 Parse");
                 }
                 "c2" => {
-                    c2 = value.parse::<f64>().expect("Invalid C2 Parse");
+                    c2 = value.parse::<f32>().expect("Invalid C2 Parse");
                 }
                 "y1" => {
-                    y1 = value.parse::<f64>().expect("Invalid Y1 Parse");
+                    y1 = value.parse::<f32>().expect("Invalid Y1 Parse");
                 }
                 "y2" => {
-                    y2 = value.parse::<f64>().expect("Invalid Y2 Parse");
+                    y2 = value.parse::<f32>().expect("Invalid Y2 Parse");
                 }
                 _ => {
                     println!("Command not supported");
@@ -97,7 +97,7 @@ fn main() {
         }
     }
 
-    let mut key_result: Option<(f64, f64)> = None;
+    let mut key_result: Option<(f32, f32)> = None;
 
     match operation {
         Operation::KeyGeneration => {
@@ -105,7 +105,11 @@ fn main() {
             // return key_result;
         }
         Operation::Encryption => {
-            let file_data = read_file(&op_value);
+            // let file_data = read_file(&op_value);
+            let file_data3: audioencrypt::utils::AudioReadData = read_waver(&op_value);
+            // print out file_data3.sample_rate, file_data3.n_channels
+            println!("sample rate: {}, n_channel: {}", file_data3.sample_rate, file_data3.n_channels);
+            // let write_back_wave = wrtie_waver("test_waveer.wav", file_data3.bytes.clone(), file_data3.sample_rate, file_data3.n_channels);
             // let _file_data2 = read_mp3(&op_value);
             // match _file_data2 {
             //     Some(data) => {
@@ -114,10 +118,10 @@ fn main() {
             //     }
             //     None => println!("no data available")
             // }
-            let _encrypted_data = encrypt(file_data, c1, c2, y1, y2);
+            let _encrypted_data = encrypt(file_data3.bytes, c1, c2, y1, y2);
             // write_mp3();
             // println!("File data2: {:?}", _file_data2);
-            println!("last byte of raw data: {:?}", &_encrypted_data[1]);
+            // println!("last byte of raw data: {:?}", &_encrypted_data[1]);
             // println!("Last byte of encrypted data: {:?}", encrypted_data.first());
             // write_file(&format!("encrypted_{}", &op_value), encrypted_data);
         }

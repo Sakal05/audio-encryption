@@ -8,34 +8,34 @@ use crate::utils::{
     KeyParameter,
 };
 
-pub fn decrypt(raw: Vec<u64>, c1: f64, c2: f64, y1: f64, y2: f64) -> Vec<u8> {
-    let mut decrypted_data: Vec<u8> = Vec::new();
-    let mut y1_: f64 = y1;
-    let mut y2_: f64 = y2;
+pub fn decrypt(raw: Vec<f32>, c1: f32, c2: f32, y1: f32, y2: f32) -> Vec<f32> {
+    let mut decrypted_data: Vec<f32> = Vec::new();
+    let mut y1_: f32 = y1;
+    let mut y2_: f32 = y2;
 
     let rounded_c1_y1 = limit_decimal_places(c1 * y1_, 5);
     let rounded_c2_y2 = limit_decimal_places(c2 * y2_, 5);
 
     for byte in raw {
-        // let mut v: f64 = byte as f64;
+        // let mut v: f32 = byte as f32;
         // if byte == 255 {
-        //     v = 256 as f64;
+        //     v = 256 as f32;
         // }
         let key_parameter = KeyParameter {
-            // x: normalize(byte as f64),
-            x: byte as f64,
+            // x: normalize(byte as f32),
+            x: byte,
             p: rounded_c1_y1,
             q: rounded_c2_y2,
         };
         let mut y = key_parameter.reverse_y_function();
         // prevent_overflow(&mut y);
-        y = denormalize(y);
+        // y = denormalize(y);
 
         if y.is_finite() {
             y2_ = y1_;
             y1_ = y;
             // prevent_overflow(&mut y);
-            decrypted_data.push(y.round() as u8);
+            decrypted_data.push(y as f32);
         } else {
             // Handle the case where y is infinite
             println!("Y value is infinite! Skipping this byte.");

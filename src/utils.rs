@@ -1,58 +1,55 @@
 pub trait Function<T> {
-    fn y_function(&self) -> f64;
-    fn reverse_y_function(&self) -> f64;
+    fn y_function(&self) -> f32;
+    fn reverse_y_function(&self) -> f32;
 }
 
 #[derive(Debug)]
 pub struct KeyParameter<T> {
     pub x: T,
-    pub p: f64,
-    pub q: f64
+    pub p: f32,
+    pub q: f32
 }
 
 
 impl<T> Function<T> for KeyParameter<T> where
-T: Into<f64> + Copy,
+T: Into<f32> + Copy,
 {
-    fn y_function(&self) -> f64 {
-        let x_as_f64: f64 = self.x.into(); // Convert character to a numeric type first
+    fn y_function(&self) -> f32 {
+        let x_as_f32: f32 = self.x.into(); // Convert character to a numeric type first
         // print all value
-        // println!("x: {}, p: {}, q: {}", x_as_f64, self.p, self.q);
-        let result = x_as_f64 + self.p + self.q; // Perform the arithmetic and implicitly return the result
+        // println!("x: {}, p: {}, q: {}", x_as_f32, self.p, self.q);
+        let result = x_as_f32 + self.p + self.q; // Perform the arithmetic and implicitly return the result
         // println!("F Function result: {}", result);
         result
     }
 
-    fn reverse_y_function(&self) -> f64 {
-        let x_as_f64: f64 = self.x.into(); // Convert character to a numeric type first
+    fn reverse_y_function(&self) -> f32 {
+        let x_as_f32: f32 = self.x.into(); // Convert character to a numeric type first
         // print all value
-        // println!("x: {}, p: {}, q: {}", x_as_f64, self.p, self.q);
-        let result = x_as_f64 - self.p - self.q; // Perform the arithmetic and implicitly return the result
+        // println!("x: {}, p: {}, q: {}", x_as_f32, self.p, self.q);
+        let result = x_as_f32 - self.p - self.q; // Perform the arithmetic and implicitly return the result
         // println!("F Function result: {}", result);
         result
     }
 }
 
-pub fn prevent_overflow(y: &mut f64) {
+pub fn prevent_overflow(y: &mut f32) {
     *y = (*y + 1.00 % 2.00) - 1.00;
     // *y = y.clamp(0.0, 1.0);
 
 }
 
-const MAX_ORIGINAL: u8 = u8::MAX;
-const MIN_ORIGINAL: u8 = u8::MIN;
-
-pub fn normalize(n:f64) -> f64 {
-    // (n - MIN_ORIGINAL as f64) / (MAX_ORIGINAL as f64 - MIN_ORIGINAL as f64)
+pub fn normalize(n:f32) -> f32 {
+    // (n - MIN_ORIGINAL as f32) / (MAX_ORIGINAL as f32 - MIN_ORIGINAL as f32)
     (n - 127.5) / 127.5
     // (n / 127.5) - 1.0
     // let n = (n - 128.0) / 128.0;
     // n
 }
 
-pub fn denormalize(n: f64) -> f64 {
+pub fn denormalize(n: f32) -> f32 {
     (n * 127.5) + 127.5
-    // n * (MAX_ORIGINAL as f64 - MIN_ORIGINAL as f64) + MIN_ORIGINAL as f64
+    // n * (MAX_ORIGINAL as f32 - MIN_ORIGINAL as f32) + MIN_ORIGINAL as f32
     // (n + 1.0) * 127.5
     // let n = (n * 128.0) + 128.0;
     // n
@@ -75,9 +72,57 @@ pub fn write_file(file_path: &str, bytes: Vec<u8>){
     file.write_all(&bytes).unwrap();
 }
 
-pub fn limit_decimal_places(value: f64, decimal_places: usize) -> f64 {
-    let multiplier = 10u64.pow(decimal_places as u32) as f64;
+pub fn limit_decimal_places(value: f32, decimal_places: usize) -> f32 {
+    let multiplier = 10u64.pow(decimal_places as u32) as f32;
     (value * multiplier).round() / multiplier
+}
+
+
+use wavers::Wav;
+
+pub struct AudioReadData {
+    pub bytes: Vec<f32>,
+    pub sample_rate: i32,
+    pub n_channels: u16
+}
+
+pub fn read_waver(file_path: &str) -> AudioReadData {
+    // Two ways of converted a wav file
+    // let fp: "./path/to/i16_encoded_wav.wav";
+    let mut wav: Wav<f32> = Wav::from_path(file_path).unwrap();
+    // conversion happens automatically when you read
+    let samples: &[f32] = &wav.read().unwrap();
+    let sample_rate = wav.sample_rate();
+    let n_channels = wav.n_channels();
+
+    // or read and then call the convert function on the samples.
+    // let (samples, sample_rate): (Samples<i16>, i32) = read::<i16, _>(file_path).unwrap();
+    // let samples: &[f32] = &samples.convert();
+    // println!("Sample file data: {:?}", samples);
+    AudioReadData {
+        bytes: samples.to_vec(),
+        sample_rate,
+        n_channels,
+    }
+    
+}
+
+use wavers::write;
+pub fn write_waver(file_path: &str, bytes: Vec<f32>, sample_rate: i32, n_channels: u16) {
+	// let fp: &Path = &Path::new("path/to/wav.wav");
+	let out_fp = file_path;
+
+	// two main ways, read and write as the type when reading
+    // let wav: Wav<i16> = Wav::from_path(fp).unwrap();
+    // wav.write(out_fp).unwrap();
+
+	// or read, convert, and write
+    // let (samples, sample_rate): (Samples<i16>,i32) = read::<i16, _>(fp).unwrap();
+    // let sample_rate = wav.sample_rate();
+    // let n_channels = wav.n_channels();
+
+    // let samples: &[f32] = &samples.convert();
+    write(out_fp, bytes.as_slice(), sample_rate, n_channels).unwrap();
 }
 
 // Function to encode audio samples into MP3 format and write to a file
@@ -147,108 +192,108 @@ pub fn limit_decimal_places(value: f64, decimal_places: usize) -> f64 {
 
 // }
 
-use symphonia::core::audio::SampleBuffer;
-use symphonia::core::codecs::DecoderOptions;
-use symphonia::core::conv::IntoSample;
-use symphonia::core::errors::Error;
-use symphonia::core::formats::FormatOptions;
-use symphonia::core::io::MediaSourceStream;
-use symphonia::core::meta::MetadataOptions;
-use symphonia::core::probe::Hint;
+// use symphonia::core::audio::SampleBuffer;
+// use symphonia::core::codecs::DecoderOptions;
+// use symphonia::core::conv::IntoSample;
+// use symphonia::core::errors::Error;
+// use symphonia::core::formats::FormatOptions;
+// use symphonia::core::io::MediaSourceStream;
+// use symphonia::core::meta::MetadataOptions;
+// use symphonia::core::probe::Hint;
 
-pub fn read_mp3(path: &str) -> Option<Vec<f32>> {
-    // let path = args.get(1).expect("file path not provided");
+// pub fn read_mp3(path: &str) -> Option<Vec<f32>> {
+//     // let path = args.get(1).expect("file path not provided");
 
-    // Open the media source.
-    let file = Box::new(File::open(path).unwrap());
+//     // Open the media source.
+//     let file = Box::new(File::open(path).unwrap());
 
-    // Create the media source stream using the boxed media source from above.
-    let mss = MediaSourceStream::new(file, Default::default());
+//     // Create the media source stream using the boxed media source from above.
+//     let mss = MediaSourceStream::new(file, Default::default());
 
-    // Create a hint to help the format registry guess what format reader is appropriate. In this
-    // example we'll leave it empty.
-    let hint = Hint::new();
+//     // Create a hint to help the format registry guess what format reader is appropriate. In this
+//     // example we'll leave it empty.
+//     let hint = Hint::new();
 
-    // Use the default options when reading and decoding.
-    let format_opts: FormatOptions = Default::default();
-    let metadata_opts: MetadataOptions = Default::default();
-    let decoder_opts: DecoderOptions = Default::default();
+//     // Use the default options when reading and decoding.
+//     let format_opts: FormatOptions = Default::default();
+//     let metadata_opts: MetadataOptions = Default::default();
+//     let decoder_opts: DecoderOptions = Default::default();
 
-    // Probe the media source stream for a format.
-    let probed =
-        symphonia::default::get_probe().format(&hint, mss, &format_opts, &metadata_opts).unwrap();
+//     // Probe the media source stream for a format.
+//     let probed =
+//         symphonia::default::get_probe().format(&hint, mss, &format_opts, &metadata_opts).unwrap();
 
-    // Get the format reader yielded by the probe operation.
-    let mut format = probed.format;
+//     // Get the format reader yielded by the probe operation.
+//     let mut format = probed.format;
 
-    // Get the default track.
-    let track = format.default_track().unwrap();
+//     // Get the default track.
+//     let track = format.default_track().unwrap();
 
-    // Create a decoder for the track.
-    let mut decoder =
-        symphonia::default::get_codecs().make(&track.codec_params, &decoder_opts).unwrap();
+//     // Create a decoder for the track.
+//     let mut decoder =
+//         symphonia::default::get_codecs().make(&track.codec_params, &decoder_opts).unwrap();
 
-    // Store the track identifier, we'll use it to filter packets.
-    let track_id = track.id;
+//     // Store the track identifier, we'll use it to filter packets.
+//     let track_id = track.id;
 
-    let mut sample_count = 0;
-    let mut sample_buf = None;
+//     let mut sample_count = 0;
+//     let mut sample_buf = None;
 
-    loop {
-        // Get the next packet from the format reader.
-        // let packet = format.next_packet().ok()?;
-        let packet = match format.next_packet() {
-            Ok(packet) => packet,
-            Error => break, // No more packets, exit loop
-        };
+//     loop {
+//         // Get the next packet from the format reader.
+//         // let packet = format.next_packet().ok()?;
+//         let packet = match format.next_packet() {
+//             Ok(packet) => packet,
+//             Error => break, // No more packets, exit loop
+//         };
 
-        // If the packet does not belong to the selected track, skip it.
-        if packet.track_id() != track_id {
-            continue;
-        }
+//         // If the packet does not belong to the selected track, skip it.
+//         if packet.track_id() != track_id {
+//             continue;
+//         }
 
-        // Decode the packet into audio samples, ignoring any decode errors.
-        match decoder.decode(&packet) {
-            Ok(audio_buf) => {
-                // The decoded audio samples may now be accessed via the audio buffer if per-channel
-                // slices of samples in their native decoded format is desired. Use-cases where
-                // the samples need to be accessed in an interleaved order or converted into
-                // another sample format, or a byte buffer is required, are covered by copying the
-                // audio buffer into a sample buffer or raw sample buffer, respectively. In the
-                // example below, we will copy the audio buffer into a sample buffer in an
-                // interleaved order while also converting to a f32 sample format.
+//         // Decode the packet into audio samples, ignoring any decode errors.
+//         match decoder.decode(&packet) {
+//             Ok(audio_buf) => {
+//                 // The decoded audio samples may now be accessed via the audio buffer if per-channel
+//                 // slices of samples in their native decoded format is desired. Use-cases where
+//                 // the samples need to be accessed in an interleaved order or converted into
+//                 // another sample format, or a byte buffer is required, are covered by copying the
+//                 // audio buffer into a sample buffer or raw sample buffer, respectively. In the
+//                 // example below, we will copy the audio buffer into a sample buffer in an
+//                 // interleaved order while also converting to a f32 sample format.
 
-                // If this is the *first* decoded packet, create a sample buffer matching the
-                // decoded audio buffer format.
-                if sample_buf.is_none() {
-                    // Get the audio buffer specification.
-                    let spec = *audio_buf.spec();
+//                 // If this is the *first* decoded packet, create a sample buffer matching the
+//                 // decoded audio buffer format.
+//                 if sample_buf.is_none() {
+//                     // Get the audio buffer specification.
+//                     let spec = *audio_buf.spec();
 
-                    // Get the capacity of the decoded buffer. Note: This is capacity, not length!
-                    let duration = audio_buf.capacity() as u64;
+//                     // Get the capacity of the decoded buffer. Note: This is capacity, not length!
+//                     let duration = audio_buf.capacity() as u64;
 
-                    // Create the f32 sample buffer.
-                    sample_buf = Some(SampleBuffer::<f32>::new(duration, spec));
-                }
+//                     // Create the f32 sample buffer.
+//                     sample_buf = Some(SampleBuffer::<f32>::new(duration, spec));
+//                 }
 
-                // Copy the decoded audio buffer into the sample buffer in an interleaved format.
-                if let Some(buf) = &mut sample_buf {
-                    buf.copy_interleaved_ref(audio_buf);
-                    // println!("Buffer: {:?} ", buf.samples());
-                    // The samples may now be access via the `samples()` function.
-                    sample_count += buf.samples().len();
-                    print!("\rDecoded {} samples", sample_count);
-                }
-            }
-            Err(Error::DecodeError(_)) => (),
-            Err(_) => break,
-        }
-    }
+//                 // Copy the decoded audio buffer into the sample buffer in an interleaved format.
+//                 if let Some(buf) = &mut sample_buf {
+//                     buf.copy_interleaved_ref(audio_buf);
+//                     // println!("Buffer: {:?} ", buf.samples());
+//                     // The samples may now be access via the `samples()` function.
+//                     sample_count += buf.samples().len();
+//                     print!("\rDecoded {} samples", sample_count);
+//                 }
+//             }
+//             Err(Error::DecodeError(_)) => (),
+//             Err(_) => break,
+//         }
+//     }
 
-    if let Some(sample_buf) = sample_buf {
-        Some(sample_buf.samples().to_vec())
-    } else {
-        None
-    }
-}
+//     if let Some(sample_buf) = sample_buf {
+//         Some(sample_buf.samples().to_vec())
+//     } else {
+//         None
+//     }
+// }
 
