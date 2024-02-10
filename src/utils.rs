@@ -15,28 +15,21 @@ impl<T> Function<T> for KeyParameter<T> where
 T: Into<f32> + Copy,
 {
     fn y_function(&self) -> f32 {
-        let x_as_f32: f32 = self.x.into(); // Convert character to a numeric type first
-        // print all value
-        // println!("x: {}, p: {}, q: {}", x_as_f32, self.p, self.q);
-        let result = x_as_f32 + self.p + self.q; // Perform the arithmetic and implicitly return the result
-        // println!("F Function result: {}", result);
+        let x_as_f32: f32 = self.x.into();
+        let result = prevent_overflow(x_as_f32 + self.p + self.q);
         result
     }
 
     fn reverse_y_function(&self) -> f32 {
-        let x_as_f32: f32 = self.x.into(); // Convert character to a numeric type first
-        // print all value
-        // println!("x: {}, p: {}, q: {}", x_as_f32, self.p, self.q);
-        let result = x_as_f32 - self.p - self.q; // Perform the arithmetic and implicitly return the result
-        // println!("F Function result: {}", result);
+        let x_as_f32: f32 = self.x.into();
+        let result = x_as_f32 - self.p - self.q;
         result
     }
 }
 
-pub fn prevent_overflow(y: &mut f32) {
-    *y = (*y + 1.00 % 2.00) - 1.00;
-    // *y = y.clamp(0.0, 1.0);
-
+pub fn prevent_overflow(y: f32) -> f32 {
+    let y = ((y + 1 as f32) % 2 as f32) - 1 as f32;
+    y
 }
 
 pub fn normalize(n:f32) -> f32 {
@@ -55,6 +48,7 @@ pub fn denormalize(n: f32) -> f32 {
     // n
 }
 
+use std::any::Any;
 use std::fs::File;
 use std::io::{Read, Write, BufReader, BufWriter};
 
@@ -72,14 +66,14 @@ pub fn write_file(file_path: &str, bytes: Vec<u8>){
     file.write_all(&bytes).unwrap();
 }
 
-pub fn limit_decimal_places(value: f32, decimal_places: usize) -> f32 {
-    let multiplier = 10u64.pow(decimal_places as u32) as f32;
+pub fn limit_decimal_places(value: f32, decimal_places: u32) -> f32 {
+    let multiplier = 10i32.pow(decimal_places) as f32;
     (value * multiplier).round() / multiplier
 }
 
 
 use wavers::Wav;
-
+#[derive(Debug)]
 pub struct AudioReadData {
     pub bytes: Vec<f32>,
     pub sample_rate: i32,
@@ -112,16 +106,6 @@ pub fn write_waver(file_path: &str, bytes: Vec<f32>, sample_rate: i32, n_channel
 	// let fp: &Path = &Path::new("path/to/wav.wav");
 	let out_fp = file_path;
 
-	// two main ways, read and write as the type when reading
-    // let wav: Wav<i16> = Wav::from_path(fp).unwrap();
-    // wav.write(out_fp).unwrap();
-
-	// or read, convert, and write
-    // let (samples, sample_rate): (Samples<i16>,i32) = read::<i16, _>(fp).unwrap();
-    // let sample_rate = wav.sample_rate();
-    // let n_channels = wav.n_channels();
-
-    // let samples: &[f32] = &samples.convert();
     write(out_fp, bytes.as_slice(), sample_rate, n_channels).unwrap();
 }
 

@@ -23,7 +23,7 @@ pub fn generate_key(key: &str, c1: f32, c2: f32, y1: f32, y2: f32) -> Result<(f3
             };
             let mut y = key_parameter.y_function();
             // println!("Before overlfow: {:?}", key_parameter);
-            prevent_overflow(&mut y);
+            y = prevent_overflow(y);
 
             // println!("After overlfow: {:?}", y);
             y2_ = y1_;

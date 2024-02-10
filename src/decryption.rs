@@ -1,58 +1,41 @@
-use crate::utils::{
-    denormalize,
-    limit_decimal_places,
-    normalize,
-    prevent_overflow,
-    read_file,
-    Function,
-    KeyParameter,
-};
+use crate::utils::{ prevent_overflow, read_waver };
 
 pub fn decrypt(raw: Vec<f32>, c1: f32, c2: f32, y1: f32, y2: f32) -> Vec<f32> {
     let mut decrypted_data: Vec<f32> = Vec::new();
     let mut y1_: f32 = y1;
     let mut y2_: f32 = y2;
 
-    let rounded_c1_y1 = limit_decimal_places(c1 * y1_, 5);
-    let rounded_c2_y2 = limit_decimal_places(c2 * y2_, 5);
-
     for byte in raw {
-        // let mut v: f32 = byte as f32;
-        // if byte == 255 {
-        //     v = 256 as f32;
-        // }
-        let key_parameter = KeyParameter {
-            // x: normalize(byte as f32),
-            x: byte,
-            p: rounded_c1_y1,
-            q: rounded_c2_y2,
-        };
-        let mut y = key_parameter.reverse_y_function();
-        // prevent_overflow(&mut y);
-        // y = denormalize(y);
+        // println!("Y1: {}, Y2: {}", y1_, y2_);
+        let y = prevent_overflow(byte - c1 * y1_ - c2 * y2_);
 
-        if y.is_finite() {
-            y2_ = y1_;
-            y1_ = y;
-            // prevent_overflow(&mut y);
-            decrypted_data.push(y as f32);
-        } else {
-            // Handle the case where y is infinite
-            println!("Y value is infinite! Skipping this byte.");
-            // You might want to decide how to handle this scenario, e.g., skip the byte or use a default value.
+        y2_ = y1_;
+        y1_ = y;
+        // prevent_overflow(&mut y);
+        decrypted_data.push(y);
+
+        if !y.is_finite() {
+            println!("Infinite value is not finite! Skipping this byte.");
+            break;
         }
     }
 
-    let file_data = read_file("KWAN_Confuse.mp3");
-    // for (p, byte) in decrypted_data.clone().into_iter().enumerate() {
-    //     if byte == 255 {
-    //         decrypted_data[p] = 255;
-    //         println!("Value missed match: L {}, R {}", byte, decrypted_data[p]);
+    let file_data3 = read_waver("er.wav");
+
+    // for (p, byte) in file_data3.bytes.clone().iter().enumerate() {
+    //     let tolerance = 0.0001; // Adjust as needed
+
+    //     // Compare the absolute difference between the values with the tolerance
+    //     if (byte - &decrypted_data[p]).abs() > tolerance {
+    //         println!("Mismatch at position {}: Raw {}, Decrypted {}, File {}",
+    //                 p, *byte, decrypted_data[p], file_data3.bytes[p]);
+    //     } else {
+    //         println!("Same at position {}: Raw {}, Decrypted {}, File {}",
+    //                 p, *byte, decrypted_data[p], file_data3.bytes[p]);
     //     }
     // }
-
     // Clone the decrypted_data vector for adjustment
-    let mut adjusted_data = decrypted_data.clone();
+    // let mut adjusted_data = decrypted_data.clone();
 
     // Adjust decrypted_data values
     // Adjust decrypted_data values
@@ -99,5 +82,5 @@ pub fn decrypt(raw: Vec<f32>, c1: f32, c2: f32, y1: f32, y2: f32) -> Vec<f32> {
     //     }
     // }
     // println!("Decryption bytes: {:?}", decrypted_bytes.first());
-    adjusted_data
+    decrypted_data
 }

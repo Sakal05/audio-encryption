@@ -1,5 +1,5 @@
 use audioencrypt::{
-    decryption::decrypt, encryption::encrypt, key_generator, utils::{ read_file, read_waver, write_file }
+    decryption::decrypt, encryption::encrypt, key_generator, utils::{ read_file, read_waver, write_file, write_waver }
 };
 use std::env;
 
@@ -105,32 +105,21 @@ fn main() {
             // return key_result;
         }
         Operation::Encryption => {
-            // let file_data = read_file(&op_value);
             let file_data3: audioencrypt::utils::AudioReadData = read_waver(&op_value);
-            // print out file_data3.sample_rate, file_data3.n_channels
-            println!("sample rate: {}, n_channel: {}", file_data3.sample_rate, file_data3.n_channels);
-            // let write_back_wave = wrtie_waver("test_waveer.wav", file_data3.bytes.clone(), file_data3.sample_rate, file_data3.n_channels);
-            // let _file_data2 = read_mp3(&op_value);
-            // match _file_data2 {
-            //     Some(data) => {
-            //         println!("Data: {:?}", data);
-            //         let _encrypted_data: Vec<f32> = encrypt(data, c1, c2, y1, y2);
-            //     }
-            //     None => println!("no data available")
-            // }
+            println!("File metadata: {} / {}", file_data3.sample_rate, file_data3.n_channels);
+            println!("last raw data: {:?}", file_data3.bytes.last());
             let _encrypted_data = encrypt(file_data3.bytes, c1, c2, y1, y2);
-            // write_mp3();
-            // println!("File data2: {:?}", _file_data2);
-            // println!("last byte of raw data: {:?}", &_encrypted_data[1]);
-            // println!("Last byte of encrypted data: {:?}", encrypted_data.first());
-            // write_file(&format!("encrypted_{}", &op_value), encrypted_data);
+            println!("Last encrypted data: {:?}", _encrypted_data.last());
+            let _write_en_back_wave = write_waver("test_waveer_en.wav", _encrypted_data.clone(), file_data3.sample_rate, file_data3.n_channels);
         }
         Operation::Decryption => {
-            // let file_data = read_file(&op_value);
-            // // println!("last byte of encrypted data: {:?}", file_data.first());
-            // let decrypted_data = decrypt(file_data, c1, c2, y1, y2);
-            // println!("last decrypted data: {:?}", decrypted_data.first());
-            // write_file(&format!("decrypted_{}", &op_value), decrypted_data);
+            let file_data3: audioencrypt::utils::AudioReadData = read_waver(&op_value);
+            println!("File metadata: {} / {}", file_data3.sample_rate, file_data3.n_channels);
+
+            let decrypted_data = decrypt(file_data3.bytes, c1, c2, y1, y2);
+            println!("Last decrypted data: {:?}", decrypted_data.last());
+
+            let _write_dec_back_wave = write_waver("er_dec.wav", decrypted_data.clone(), file_data3.sample_rate, file_data3.n_channels);
         }
     }
 
@@ -139,3 +128,7 @@ fn main() {
     }
 
 }
+
+// cargo run -- operation=encrypt value=er.wav c1=-0.6812081080792964 c2=0.8923235548247561 y1=-0.34553456 y2=0.378675
+
+// cargo run -- operation=decrypt value=test_waveer_en.wav c1=-0.6812081080792964 c2=0.8923235548247561 y1=-0.34553456 y2=0.378675
