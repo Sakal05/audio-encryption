@@ -1,12 +1,12 @@
 // use crate::utils::{ Function, KeyParameter };
 
-use crate::utils::prevent_overflow;
+use crate::utils::{prevent_overflow, write_waver};
 
 pub fn encrypt(raw: Vec<f32>, c1: f32, c2: f32, y1: f32, y2: f32) -> Vec<f32> {
     let mut encrypted_data: Vec<f32> = Vec::new();
     let mut y1_: f32 = y1;
     let mut y2_: f32 = y2;
-    for byte in raw.clone() {
+    for byte in raw {
         // println!("Y1: {} and Y2: {}", y1_, y2_);
         let y = byte + (c1 * y1_) + (c2 * y2_);
 
@@ -20,7 +20,7 @@ pub fn encrypt(raw: Vec<f32>, c1: f32, c2: f32, y1: f32, y2: f32) -> Vec<f32> {
             break;
         }
     }
-    println!("Encrypted data: {:?}", encrypted_data);
+    // println!("Encrypted data: {:?}", encrypted_data);
     // println!("Rae data: {:?}", raw);
     encrypted_data
 }

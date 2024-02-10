@@ -109,7 +109,7 @@ fn main() {
 
             let _encrypted_data = encrypt(file_data3.bytes, c1, c2, y1, y2);
 
-            let _write_en_back_wave = write_waver(&format!("Encrypted_Audio/E_{}", &op_value), _encrypted_data.clone(), file_data3.sample_rate, file_data3.n_channels);
+            let _write_en_back_wave = write_waver(&format!("Encrypted_Audio/E_{}", &op_value), _encrypted_data, file_data3.sample_rate, file_data3.n_channels);
         }
         Operation::Decryption => {
             let file_data3: audioencrypt::utils::AudioReadData = read_waver(&op_value).expect("Failed read data");
@@ -117,7 +117,7 @@ fn main() {
             let decrypted_data = decrypt(file_data3.bytes, c1, c2, y1, y2);
             let sub_path = op_value.split("Encrypted_Audio/E_").nth(1).unwrap_or("");
             let file_path = format!("Decrypted_Audio/D_{}", sub_path);
-            let _write_dec_back_wave = write_waver(&file_path, decrypted_data.clone(), file_data3.sample_rate, file_data3.n_channels);
+            let _write_dec_back_wave = write_waver(&file_path, decrypted_data, file_data3.sample_rate, file_data3.n_channels);
         }
     }
 
