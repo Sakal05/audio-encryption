@@ -1,5 +1,5 @@
 use audioencrypt::{
-    decryption::decrypt, encryption::encrypt, key_generator, utils::{ read_file, read_waver, write_file, write_waver }
+    decryption::decrypt, encryption::encrypt, key_generator, utils::{ read_waver, write_waver }
 };
 use std::env;
 
@@ -21,9 +21,9 @@ fn main() {
     Arg 6: Y2 value
 
     Example run:
-    Key Generation Example: cargo run -- operation=generate_key value=testing123xza1sd c1=0.345567 c2=0.134134 y1=-0.34553456 y2=0.378675
-    Encryption: Example: cargo run -- operation=encrypt value=KWAN_Confuse.mp3 c1=-0.6812081080792964 c2=0.8923235548247561 y1=-0.34553456 y2=0.378675
-    Decryption: Example: cargo run -- operation=decrypt value=encrypted_typing.mp3 c1=-0.6812081080792964 c2=0.8923235548247561 y1=-0.34553456 y2=0.378675
+    Key Generation: cargo run -- operation=generate_key value=asdbgffdmsestuiu c1=0.5 c2=0.25 y1=-0.25 y2=0.02
+    Encryption: cargo run -- operation=encrypt value=er.wav c1=-0.2505455 c2=-0.33556747 y1=0.25 y2=0.02
+    Decryption: cargo run -- operation=decrypt value=/Users/macos/audio-read/Encrypted_Audio/E_er.wav c1=-0.2505455 c2=-0.33556747 y1=0.25 y2=0.02
     */
     enum Operation {
         KeyGeneration,
@@ -105,21 +105,19 @@ fn main() {
             // return key_result;
         }
         Operation::Encryption => {
-            let file_data3: audioencrypt::utils::AudioReadData = read_waver(&op_value);
-            println!("File metadata: {} / {}", file_data3.sample_rate, file_data3.n_channels);
-            println!("last raw data: {:?}", file_data3.bytes.last());
+            let file_data3: audioencrypt::utils::AudioReadData = read_waver(&op_value).expect("Failed read data");
+
             let _encrypted_data = encrypt(file_data3.bytes, c1, c2, y1, y2);
-            println!("Last encrypted data: {:?}", _encrypted_data.last());
-            let _write_en_back_wave = write_waver("test_waveer_en.wav", _encrypted_data.clone(), file_data3.sample_rate, file_data3.n_channels);
+
+            let _write_en_back_wave = write_waver(&format!("Encrypted_Audio/E_{}", &op_value), _encrypted_data.clone(), file_data3.sample_rate, file_data3.n_channels);
         }
         Operation::Decryption => {
-            let file_data3: audioencrypt::utils::AudioReadData = read_waver(&op_value);
-            println!("File metadata: {} / {}", file_data3.sample_rate, file_data3.n_channels);
+            let file_data3: audioencrypt::utils::AudioReadData = read_waver(&op_value).expect("Failed read data");
 
             let decrypted_data = decrypt(file_data3.bytes, c1, c2, y1, y2);
-            println!("Last decrypted data: {:?}", decrypted_data.last());
-
-            let _write_dec_back_wave = write_waver("er_dec.wav", decrypted_data.clone(), file_data3.sample_rate, file_data3.n_channels);
+            let sub_path = op_value.split("Encrypted_Audio/E_").nth(1).unwrap_or("");
+            let file_path = format!("Decrypted_Audio/D_{}", sub_path);
+            let _write_dec_back_wave = write_waver(&file_path, decrypted_data.clone(), file_data3.sample_rate, file_data3.n_channels);
         }
     }
 
@@ -129,6 +127,5 @@ fn main() {
 
 }
 
-// cargo run -- operation=encrypt value=er.wav c1=-0.6812081080792964 c2=0.8923235548247561 y1=-0.34553456 y2=0.378675
-
-// cargo run -- operation=decrypt value=test_waveer_en.wav c1=-0.6812081080792964 c2=0.8923235548247561 y1=-0.34553456 y2=0.378675
+// cargo run -- operation=encrypt value=er.wav c1=-0.2505455 c2=-0.33556747 y1=0.25 y2=0.02
+// cargo run -- operation=decrypt value=test_waveer_en.wav c1=-0.2505455 c2=-0.33556747 y1=0.25 y2=0.02

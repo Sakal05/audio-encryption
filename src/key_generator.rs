@@ -1,6 +1,6 @@
 // use std::io::Error;
 use anyhow::Error;
-use crate::utils::{Function, KeyParameter, prevent_overflow};
+use crate::utils::{ Function, KeyParameter, prevent_overflow };
 
 pub fn generate_key(key: &str, c1: f32, c2: f32, y1: f32, y2: f32) -> Result<(f32, f32), Error> {
     if key.len() != 16 {
@@ -22,23 +22,18 @@ pub fn generate_key(key: &str, c1: f32, c2: f32, y1: f32, y2: f32) -> Result<(f3
                 q: c2 * y2_,
             };
             let mut y = key_parameter.y_function();
-            // println!("Before overlfow: {:?}", key_parameter);
             y = prevent_overflow(y);
 
-            // println!("After overlfow: {:?}", y);
             y2_ = y1_;
             y1_ = y;
-    
+
             new_c1 = y2_;
             new_c2 = y1_;
-            
-            // println!("y: {y1_}\ny': {y2_}\n===============");
         }
-        let c1_xor_c2 = new_c1 as u64 ^ new_c2 as u64;
+        let c1_xor_c2 = (new_c1 as u64) ^ (new_c2 as u64);
         let shifted_result = c1_xor_c2 << 3;
         _key = shifted_result.to_string();
     }
-    // println!("Key C1: {new_c1}, Key C2: {new_c2}");
 
     Ok((new_c1, new_c2))
 }
